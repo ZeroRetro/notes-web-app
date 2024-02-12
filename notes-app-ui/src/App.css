@@ -77,3 +77,29 @@ input {
   background-color: rgb(64, 154, 184, 0.8);
   cursor: pointer;
 }
+
+.edit-buttons {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 5px;
+}
+
+.updateButton {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  background-color: rgb(64, 154, 184);
+  border: none;
+  border-radius: 5px;
+  color: white;
+}
+
+.cancelButton {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+  background-color: rgb(218, 6, 6);
+  border: none;
+  border-radius: 5px;
+  color: white;
+}

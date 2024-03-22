@@ -1,36 +1,53 @@
 import express from 'express';
 import cors from 'cors';
-import { PrismaClient } from '@prisma/client';
 
 const app = express();
-const prisma = new PrismaClient();
 
 app.use(express.json());
 app.use(cors());
 
+const notes = [
+      {
+        id: 1,
+        title: 'Note Title 1',
+        content: 'Note Content 1',
+      },
+      {
+        id: 2,
+        title: 'Note Title 2',
+        content: 'Note Content 2',
+      },
+      {
+        id: 3,
+        title: 'Note Title 3',
+        content: 'Note Content 3',
+      },
+      {
+        id: 4,
+        title: 'Note Title 4',
+        content: 'Note Content 4',
+      },
+]
+
 app.get('/api/notes', async (req, res) => {
-  const notes = await prisma.note.findMany();
   res.json(notes);
 });
 
 app.post('/api/notes', async (req, res) => {
-  const { title, content } = req.body;
+  const { title, content, id } = req.body;
 
   if (!title || !content) {
     return res.status(400).send('Title and content are required');
   }
 
-  try {
-    const note = await prisma.note.create({
-      data: {
-        title,
-        content,
-      },
-    });
-    res.json(note);
-  } catch (error) {
-    res.status(500).send('Error creating note');
-  }
+  const newNote = {
+    id,
+    title,
+    content,
+  };
+
+  notes.push(newNote);
+  res.json(newNote);
 });
 
 app.put('/api/notes/:id', async (req, res) => {
@@ -45,18 +62,20 @@ app.put('/api/notes/:id', async (req, res) => {
     return res.status(400).send('Invalid note id');
   }
 
-  try {
-    const note = await prisma.note.update({
-      where: { id },
-      data: {
-        title,
-        content,
-      },
-    });
-    res.json(note);
-  } catch (error) {
-    res.status(500).send('Error updating note');
+  const updatedNote = {
+    id,
+    title,
+    content,
+  };
+
+  const noteIndex = notes.findIndex((note) => note.id === id);
+
+  if (noteIndex === -1) {
+    return res.status(404).send('Note not found');
   }
+
+  notes[noteIndex] = updatedNote;
+  res.json(updatedNote);
 });
 
 app.delete('/api/notes/:id', async (req, res) => {
@@ -66,14 +85,14 @@ app.delete('/api/notes/:id', async (req, res) => {
     return res.status(400).send('Invalid note id');
   }
 
-  try {
-    await prisma.note.delete({
-      where: { id },
-    });
-    res.status(204).send();
-  } catch (error) {
-    res.status(500).send('Error deleting note');
+  const noteIndex = notes.findIndex((note) => note.id === id);
+
+  if (noteIndex === -1) {
+    return res.status(404).send('Note not found');
   }
+
+  notes.splice(noteIndex, 1);
+  res.status(200).send('Note deleted');
 });
 
 app.listen(5000, () => {

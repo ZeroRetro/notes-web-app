@@ -15,29 +15,52 @@ const App = () => {
 
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
+  const fetchNotes = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/notes');
+      const notes: Note[] = await response.json();
+      setNotes(notes);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchCreateNote = async (note: Note) => {
+    try {
+      await fetch('http://localhost:5000/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(note),
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const fetchUpdateNote = async (note: Note) => {
+    try {
+      await fetch(`http://localhost:5000/api/notes/${note.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(note),
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  const fetchDeleteNote = async (noteId: number) => {
+    try {
+      await fetch(`http://localhost:5000/api/notes/${noteId}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   useEffect(() => {
-    setNotes([
-      {
-        id: 1,
-        title: 'Note Title 1',
-        content: 'Note Content 1',
-      },
-      {
-        id: 2,
-        title: 'Note Title 2',
-        content: 'Note Content 2',
-      },
-      {
-        id: 3,
-        title: 'Note Title 3',
-        content: 'Note Content 3',
-      },
-      {
-        id: 4,
-        title: 'Note Title 4',
-        content: 'Note Content 4',
-      },
-    ]);
+    fetchNotes();
   }, []);
 
   const handleAddNote = (e: React.FormEvent) => {
@@ -50,6 +73,8 @@ const App = () => {
     setNotes([...notes, newNote]);
     setNewTitle('');
     setNewContent('');
+
+    fetchCreateNote(newNote);
   };
 
   const handleNoteClick = (note: Note) => {
@@ -77,6 +102,8 @@ const App = () => {
 
     setNotes(updatedNotesList);
     handleCancel();
+
+    fetchUpdateNote(updatedNote);
   };
 
   const handleCancel = () => {
@@ -89,6 +116,9 @@ const App = () => {
     e.stopPropagation();
     const updatedNotesList = notes.filter((note) => note.id !== noteId);
     setNotes(updatedNotesList);
+    handleCancel();
+
+    fetchDeleteNote(noteId);
   };
 
   return (
